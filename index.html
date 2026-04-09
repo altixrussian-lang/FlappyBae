@@ -15,23 +15,23 @@
     user-select: none;
     touch-action: none;
   }
-  
-	#game {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  border: none;
-  box-shadow: none;
-}
-
-canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
-}
-
+  #game {
+    position: relative;
+    border: 4px dashed #ff4d9e;
+    box-shadow: 0 0 40px #ff4d9e66;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+  canvas { display: block; background: #0f0f23; }
+  #score {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    font-size: 24px;
+    color: #ffb6c1;
+    text-shadow: 2px 2px 0 #000;
+    z-index: 10;
+  }
   #message {
     position: absolute;
     top: 50%;
@@ -92,20 +92,10 @@ const scoreEl = document.getElementById('score');
 const msgEl = document.getElementById('message');
 const startScreen = document.getElementById('startScreen');
 
-let W, H;
-
-function resizeGame() {
-  W = window.innerWidth;
-  H = window.innerHeight;
-
-let PIPE_GAP = H * 0.25;
-let PIPE_W = W * 0.15;
-  canvas.width = W;
-  canvas.height = H;
-}
-
-window.addEventListener("resize", resizeGame);
-resizeGame();
+const W = 420;
+const H = 600;
+canvas.width = W;
+canvas.height = H;
 
 // --- CHILL PHYSICS ---
 const GRAVITY = 0.22;
@@ -207,7 +197,7 @@ let gameOverBg = null;
 function initBird() {
   bird = {
     x: 80, y: H / 2, vy: -0.5,
-    size: Math.min(W, H) * 0.12,
+    size: 60,
     img: null, imgReady: false, rotation: 0
   };
   const randomImg = preloadedImages[Math.floor(Math.random() * preloadedImages.length)];
@@ -321,9 +311,6 @@ function drawBird() {
   ctx.save();
   ctx.translate(bird.x + bird.size / 2, bird.y + bird.size / 2);
   
-	let scale = 1 + Math.sin(frameCount * 0.1) * 0.05;
-ctx.scale(scale, scale);
-
   let targetRot = (bird.vy < 0) ? -15 : Math.min(bird.vy * 2.5, 60);
   bird.rotation += (targetRot - bird.rotation) * 0.1;
   ctx.rotate(bird.rotation * Math.PI / 180);
@@ -398,9 +385,6 @@ function gameOver() {
   alive = false;
   gameOverBg = preloadedImages[Math.floor(Math.random() * preloadedImages.length)];
   
-	canvas.style.transform = 'translate(5px, -5px)';
-setTimeout(() => canvas.style.transform = '', 100);
-
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   const deathMsg = deathTexts[Math.floor(Math.random() * deathTexts.length)];
   msgEl.innerHTML = `
