@@ -1,48 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Flappy Me 💖</title>
+<title>Flappy Bae 💖</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+  body {
     background: #1a1a2e;
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100vh;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+    overflow: hidden;
     user-select: none;
     touch-action: none;
-    cursor: pointer; /* Makes whole screen feel tappable */
   }
-  #game {
-    position: relative;
-    /* Removed boxy border/shadow for cleaner full-screen feel */
-    max-width: 100vw;
-    max-height: 100vh;
-  }
-  canvas { 
-    display: block; 
-    background: #0f0f23; 
-  }
-  #score {
-    position: absolute; top: 10px; width: 100%;
-    font-size: 24px; color: #ffb6c1; text-shadow: 2px 2px 0 #000; z-index: 10;
-  }
+  
+	#game {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  border: none;
+  box-shadow: none;
+}
+
+canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
   #message {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 30px; color: #fff; text-shadow: 3px 3px 0 #ff4d9e; z-index: 10; pointer-events: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 3px 3px 0 #ff4d9e;
+    z-index: 10;
+    pointer-events: none;
   }
   #startScreen {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: #0f0f23f0; display: flex; flex-direction: column;
-    justify-content: center; align-items: center; z-index: 20; cursor: pointer;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #0f0f23f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    cursor: pointer;
   }
-  #startScreen h1 { font-size: 46px; color: #ff4d9e; text-shadow: 4px 4px 0 #000; margin-bottom: 8px; }
-  #startScreen p { font-size: 19px; color: #ffb6c1; animation: blink 0.6s infinite alternate; }
+  #startScreen h1 {
+    font-size: 46px;
+    color: #ff4d9e;
+    text-shadow: 4px 4px 0 #000;
+    margin-bottom: 8px;
+  }
+  #startScreen p {
+    font-size: 19px;
+    color: #ffb6c1;
+    animation: blink 0.6s infinite alternate;
+  }
   @keyframes blink { from { opacity: 1; } to { opacity: 0.3; } }
 </style>
 </head>
@@ -69,10 +92,20 @@ const scoreEl = document.getElementById('score');
 const msgEl = document.getElementById('message');
 const startScreen = document.getElementById('startScreen');
 
-const W = 420;
-const H = 600;
-canvas.width = W;
-canvas.height = H;
+let W, H;
+
+function resizeGame() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+let PIPE_GAP = H * 0.25;
+let PIPE_W = W * 0.15;
+  canvas.width = W;
+  canvas.height = H;
+}
+
+window.addEventListener("resize", resizeGame);
+resizeGame();
 
 // --- CHILL PHYSICS ---
 const GRAVITY = 0.22;
@@ -174,7 +207,7 @@ let gameOverBg = null;
 function initBird() {
   bird = {
     x: 80, y: H / 2, vy: -0.5,
-    size: 60,
+    size: Math.min(W, H) * 0.12,
     img: null, imgReady: false, rotation: 0
   };
   const randomImg = preloadedImages[Math.floor(Math.random() * preloadedImages.length)];
@@ -288,6 +321,9 @@ function drawBird() {
   ctx.save();
   ctx.translate(bird.x + bird.size / 2, bird.y + bird.size / 2);
   
+	let scale = 1 + Math.sin(frameCount * 0.1) * 0.05;
+ctx.scale(scale, scale);
+
   let targetRot = (bird.vy < 0) ? -15 : Math.min(bird.vy * 2.5, 60);
   bird.rotation += (targetRot - bird.rotation) * 0.1;
   ctx.rotate(bird.rotation * Math.PI / 180);
@@ -362,6 +398,9 @@ function gameOver() {
   alive = false;
   gameOverBg = preloadedImages[Math.floor(Math.random() * preloadedImages.length)];
   
+	canvas.style.transform = 'translate(5px, -5px)';
+setTimeout(() => canvas.style.transform = '', 100);
+
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   const deathMsg = deathTexts[Math.floor(Math.random() * deathTexts.length)];
   msgEl.innerHTML = `
