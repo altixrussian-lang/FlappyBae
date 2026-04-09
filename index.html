@@ -7,29 +7,27 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     background: #1a1a2e;
-  }
-  body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
     user-select: none;
     touch-action: none;
+    cursor: pointer; /* Makes whole screen feel tappable */
   }
   #game {
     position: relative;
-    border: 4px dashed #ff4d9e;
-    box-shadow: 0 0 40px #ff4d9e66;
-    width: min(420px, 100vw);
-    height: min(600px, 100vh);
+    /* Removed boxy border/shadow for cleaner full-screen feel */
     max-width: 100vw;
     max-height: 100vh;
   }
-  canvas { display: block; background: #0f0f23; width: 100%; height: 100%; }
+  canvas { 
+    display: block; 
+    background: #0f0f23; 
+  }
   #score {
     position: absolute; top: 10px; width: 100%;
     font-size: 24px; color: #ffb6c1; text-shadow: 2px 2px 0 #000; z-index: 10;
