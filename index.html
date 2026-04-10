@@ -111,7 +111,7 @@ canvas.height = H;
 function resizeGame() {
   const scaleX = window.innerWidth / W;
   const scaleY = window.innerHeight / H;
-  const scale = Math.min(scaleX, scaleY);
+  const scale = Math.min(scaleX, scaleY) * 0.95;
 
   document.getElementById("wrapper").style.transform =
     `scale(${scale})`;
