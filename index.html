@@ -92,24 +92,24 @@ const scoreEl = document.getElementById('score');
 const msgEl = document.getElementById('message');
 const startScreen = document.getElementById('startScreen');
 
-const W = 420;
-const H = 600;
+const W = 360;
+const H = 660;
 canvas.width = W;
 canvas.height = H;
 
 // --- CHILL PHYSICS ---
-const GRAVITY = 0.22;
-const JUMP_FORCE = -4.8;
-const MAX_FALL_SPEED = 7;
+const GRAVITY = 0.20;
+const JUMP_FORCE = -4.7;
+const MAX_FALL_SPEED = 1.5;
 const PIPE_SPEED = 2.0;
-const PIPE_GAP = 165;
-const PIPE_W = 65;
-const SPAWN_RATE = 115;
+const PIPE_GAP = 170;
+const PIPE_W = 55;
+const SPAWN_RATE = 160;
 
 // Cute & funny pet names for obstacles
 const funnyLabels = [
   "My Cutiepie 🥧", "My Bunny 🐰", "My Dork 🤓", "My Snuggle Bug 🐞",
-  "My Chaos Gremlin 🌪️", "My Little Dumpling 🥟", "My Sleepy Bae 💤",
+  "My Chaos Kitty 🌪️", "My Little Dumpling 🥟", "My Sleepy Bae 💤",
   "My Walking Blanket 🧸", "My Overthinker 🧠", "My Clingy Koala 🐨"
 ];
 
@@ -129,18 +129,42 @@ const deathTexts = [
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
 
-// 🎵 CUSTOM CRASH SOUND: Change this to your MP3 filename!
-const CRASH_SOUND_FILE = 'fahhh.mp3'; // ← EDIT THIS LINE
-const crashAudio = new Audio(CRASH_SOUND_FILE);
-crashAudio.preload = 'auto';
+const clickAudio = new Audio('click.mp3');
+clickAudio.preload = 'auto';
 
+// 🎵 CUSTOM CRASH SOUND: Change this to your MP3 filename!
+const crashSounds = [
+  'fahhh.mp3',
+  'e2.mp3',
+  'e3.mp3',
+  'e4.mp3',
+  'e5.mp3',
+  'e6.mp3',
+  'e7.mp3',
+  'e7 - copy.mp3' // 👈 renamed
+];
+
+let currentCrashAudio = null;
+// preload all sounds
+const crashAudios = crashSounds.map(src => {
+  const a = new Audio(src);
+  a.preload = 'auto';
+  return a;
+});
 function initAudio() { 
   if (!audioCtx) {
     audioCtx = new AudioCtx();
     audioCtx.resume(); 
   }
   // Unlock mobile audio on first interaction
-  crashAudio.load();
+  crashAudios.forEach(a => a.load());
+}
+
+function playClick() {
+  clickAudio.currentTime = 0;
+  clickAudio.volume = 1.0;
+  clickAudio.playbackRate = 0.9 + Math.random() * 0.2;
+  clickAudio.play().catch(() => {});
 }
 
 function playJump() {
@@ -171,13 +195,23 @@ function playScore() {
 }
 
 function playCrash() {
-  // 🎵 Play custom MP3 crash sound
-  crashAudio.currentTime = 0;
-  crashAudio.volume = 1; // Adjust volume here (0.0 to 1.0)
-  crashAudio.play().catch(e => {
-    // Fallback: silent fail if audio won't play (mobile restrictions, missing file, etc.)
-    // console.log('Crash sound failed:', e);
-  });
+  const audio = crashAudios[
+    Math.floor(Math.random() * crashAudios.length)
+  ];
+
+  // stop previous if somehow still playing
+  if (currentCrashAudio) {
+    currentCrashAudio.pause();
+    currentCrashAudio.currentTime = 0;
+  }
+
+  currentCrashAudio = audio;
+
+  audio.currentTime = 0;
+  audio.volume = 1.0;
+  audio.playbackRate = 0.95 + Math.random() * 0.1;
+
+  audio.play().catch(() => {});
 }
 
 // --- PRELOAD IMAGES ---
@@ -196,7 +230,7 @@ let gameOverBg = null;
 
 function initBird() {
   bird = {
-    x: 80, y: H / 2, vy: -0.5,
+    x: 80 ,y: H / 2, vy: -0.5,
     size: 60,
     img: null, imgReady: false, rotation: 0
   };
@@ -211,6 +245,11 @@ function initBird() {
 }
 
 function reset() {
+
+  if (currentCrashAudio) {
+  currentCrashAudio.pause();
+  currentCrashAudio.currentTime = 0;
+}
   initBird();
   pipes = [];
   hearts = [];
@@ -233,6 +272,7 @@ function jump() {
   bird.vy = JUMP_FORCE;
   bird.rotation = -15;
   playJump();
+  playClick();
 }
 
 function handleInput(e) {
@@ -244,6 +284,10 @@ function handleInput(e) {
     return;
   }
   if (!alive) {
+     if (currentCrashAudio) {
+    currentCrashAudio.pause();
+    currentCrashAudio.currentTime = 0;
+  }
     reset();
     return;
   }
@@ -263,14 +307,14 @@ function spawnPipe() {
   const maxY = H - PIPE_GAP - 70;
   const gapY = minY + Math.random() * (maxY - minY);
   const label = funnyLabels[Math.floor(Math.random() * funnyLabels.length)];
-  pipes.push({ x: W + 10, gapY: gapY, scored: false, label: label });
+  pipes.push({ x: W-50, gapY: gapY, scored: false, label: label });
 }
 
 function spawnHeart() {
   hearts.push({
     x: Math.random() * W,
     y: H + 10,
-    speed: 0.3 + Math.random() * 0.5,
+    speed: 0.6 + Math.random() * 0.5,
     text: ['💕','💋','✨','💅','👀','🌸'][Math.floor(Math.random()*6)],
     alpha: 0.25 + Math.random() * 0.35
   });
@@ -311,6 +355,9 @@ function drawBird() {
   ctx.save();
   ctx.translate(bird.x + bird.size / 2, bird.y + bird.size / 2);
   
+  let scale = 1 + Math.sin(frameCount * 0.1) * 0.05;
+ctx.scale(scale, scale);  
+
   let targetRot = (bird.vy < 0) ? -15 : Math.min(bird.vy * 2.5, 60);
   bird.rotation += (targetRot - bird.rotation) * 0.1;
   ctx.rotate(bird.rotation * Math.PI / 180);
@@ -385,6 +432,9 @@ function gameOver() {
   alive = false;
   gameOverBg = preloadedImages[Math.floor(Math.random() * preloadedImages.length)];
   
+  canvas.style.transform = 'translate(5px, -5px)';
+setTimeout(() => canvas.style.transform = '', 100);
+
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   const deathMsg = deathTexts[Math.floor(Math.random() * deathTexts.length)];
   msgEl.innerHTML = `
@@ -470,4 +520,4 @@ const deathTexts = [
   "Fell for the dork... literally 😵‍💫", "Oops. Cuddle time now? 🫂", 
   "He wins. I'll allow it 🤷‍♀️💕", "Tried to dodge, got distracted by cute 🐻"
 ];
--->
+-
