@@ -351,13 +351,20 @@ function spawnPipe() {
 }
 
 function spawnHeart() {
-  hearts.push({
-    x: Math.random() * W,
-    y: H + 10,
-    speed: 0.6 + Math.random() * 0.5,
-    text: ['💕','💋','✨','💅','👀','🌸'][Math.floor(Math.random()*6)],
-    alpha: 0.25 + Math.random() * 0.35
-  });
+  const emojis = ['💕','💋','😘','💓','👀','💝','❤️‍🔥','💏','😻','😽','🍒'];
+
+  // 👉 spawn multiple hearts at once
+  const count = 4 + Math.floor(Math.random() * 4); // 2 to 4 hearts
+
+  for (let i = 0; i < count; i++) {
+    hearts.push({
+      x: Math.random() * W,
+      y: H + 10,
+      speed: 0.8 + Math.random() * 0.8, // faster = more visible
+      text: emojis[Math.floor(Math.random() * emojis.length)], // ✅ FIXED
+      alpha: 0.4 + Math.random() * 0.4  // more visible
+    });
+  }
 }
 
 function drawPipe(p) {
@@ -452,7 +459,7 @@ function drawBackground() {
     h.y -= h.speed;
   }
   hearts = hearts.filter(h => h.y > -20);
-  if (frameCount % 45 === 0 && started && alive) spawnHeart();
+  if (frameCount % 10 === 0 && started && alive) spawnHeart();
 
   ctx.fillStyle = '#ff4d9e33';
   ctx.fillRect(0, H - 3, W, 3);
