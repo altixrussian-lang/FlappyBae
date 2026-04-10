@@ -16,12 +16,17 @@
     touch-action: none;
   }
   #game {
-    position: relative;
-    border: 4px dashed #ff4d9e;
-    box-shadow: 0 0 40px #ff4d9e66;
-    max-width: 100vw;
-    max-height: 100vh;
-  }
+  position: relative;
+  border: 4px dashed #ff4d9e;
+  box-shadow: 0 0 40px #ff4d9e66;
+
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
   canvas { display: block; background: #0f0f23; }
   #score {
     position: absolute;
@@ -61,6 +66,10 @@
     text-shadow: 4px 4px 0 #000;
     margin-bottom: 8px;
   }
+ #wrapper {
+  position: relative;
+  transform-origin: top center;
+}
   #startScreen p {
     font-size: 19px;
     color: #ffb6c1;
@@ -72,9 +81,11 @@
 <body>
 
 <div id="game">
-  <canvas id="c"></canvas>
-  <div id="score"></div>
-  <div id="message"></div>
+ <div id="wrapper">
+   <canvas id="c"></canvas>
+   <div id="score"></div>
+   <div id="message"></div>
+ </div> 
   <div id="startScreen">
     <h1>💖 Flappy Me</h1>
     <p>~ tap / click / press ⬆️ to ignore my cutiepie ~</p>
@@ -97,6 +108,18 @@ const H = 660;
 canvas.width = W;
 canvas.height = H;
 
+function resizeGame() {
+  const scaleX = window.innerWidth / W;
+  const scaleY = window.innerHeight / H;
+  const scale = Math.min(scaleX, scaleY);
+
+  document.getElementById("wrapper").style.transform =
+    `scale(${scale})`;
+}
+
+window.addEventListener("resize", resizeGame);
+resizeGame();
+ 
 // --- CHILL PHYSICS ---
 /*
 const GRAVITY = 0.22;
