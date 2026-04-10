@@ -298,6 +298,8 @@ function reset() {
     startScreen.style.display = 'none';
     initAudio();
   }
+ spawnPipe();
+spawnPipe();
 }
 
 function jump() {
@@ -310,20 +312,26 @@ function jump() {
 
 function handleInput(e) {
   if (e) e.preventDefault();
+
+  // 👉 FIRST CLICK = START GAME
   if (!started) {
-    started = true;
+    reset();              // properly initializes everything
     startScreen.style.display = 'none';
     initAudio();
     return;
   }
+
+  // 👉 AFTER DEATH = RESTART
   if (!alive) {
-     if (currentCrashAudio) {
-    currentCrashAudio.pause();
-    currentCrashAudio.currentTime = 0;
-  }
+    if (currentCrashAudio) {
+      currentCrashAudio.pause();
+      currentCrashAudio.currentTime = 0;
+    }
     reset();
     return;
   }
+
+  // 👉 NORMAL GAMEPLAY
   jump();
 }
 
@@ -524,7 +532,8 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-reset();
+started = false;
+alive = false;
 loop();
 </script>
 
